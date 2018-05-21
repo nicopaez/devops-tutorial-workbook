@@ -1,0 +1,14 @@
+[Unit]
+Description=Job that runs the JavaWebApp
+After=syslog.target
+
+[Service]
+WorkingDirectory=/opt/javawebapp
+ExecStart=/usr/bin/java -Djava.security.egd=file:/dev/./urandom -Dserver.port=9000 -jar javawebapp.war --spring.profiles.active=prod &
+ExecStop=/bin/kill -TERM $MAINPID
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

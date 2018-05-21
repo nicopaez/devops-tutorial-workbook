@@ -1,0 +1,31 @@
+- hosts: all
+  sudo: yes
+  roles:
+    - colstrom.java
+  tasks:
+  - name: ensure apt cache is up to date
+    apt: update_cache=yes
+
+  - name: ensure packages are installed
+    apt: name=nginx
+
+  - name: set nginx proxy config
+    template: src=templates/default.nginx.j2 dest=/etc/nginx/sites-available/default 
+
+  - name: ensure javawebapp folder
+    file: path=/opt/javawebapp state=directory
+
+  - name: ensure sudoers do not need password
+    lineinfile: dest=/etc/sudoers state=present regexp="^%sudo" line="%sudo ALL=(ALL) NOPASSWD:ALL"
+
+  - name: ensure the javawebapp
+    copy: src=files/javawebapp.war dest=/opt/javawebapp/javawebapp.war
+
+  - name: create the javawebapp service
+    template: src=templates/javawebapp.conf.j2 dest=/etc/init/javawebapp.conf
+
+  - name: ensure javawebapp is started
+    service: name=javawebapp state=started
+
+  - name: ensure nginx is reloaded
+    service: name=nginx state=reloaded
